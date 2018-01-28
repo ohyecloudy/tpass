@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+gpg_cmd=gpg
+
+user=$1
+pub_path=password_store/.team_pubs/$user
+
+root="$(dirname "$0")/.."
+cd $root
+
+echo "add user - $user"
+echo "    $(realpath $pub_path)"
+
+$gpg_cmd --armor --export $user >$pub_path

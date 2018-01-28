@@ -5,7 +5,8 @@
 #+EMAIL: ohyecloudy@gmail.com
 * 사용 방법
 ** 사용자 추가
-*** 1. 신규 유저
+   [[../blob/master/test/test_add_user][test_add_user 테스트 스크립트 참고]]
+*** 1. 신규 유저 - public key를 저장소에 추가
     #+BEGIN_EXAMPLE
       $ gpg --gen-key
     #+END_EXAMPLE
@@ -13,8 +14,8 @@
     gpg key가 없다면 먼저 생성합니다.
 
     #+BEGIN_EXAMPLE
-      $ cd ~/.password-store
-      $ add_user ohyecloudy@gmail.com
+      $ cd ~/tpass
+      $ bin/add_user ohyecloudy@gmail.com
       $ git add .
       $ git commit -m "add ohyecloudy@gmail.com"
       $ git push
@@ -22,21 +23,21 @@
 
     gpg public key를 저장소에 추가합니다. 추가한 key로 다시 암호화를 해야지 접근할 수 있습니다. 다시 암호화를 하는 건 기존 유저만 가능합니다. 기존 유저에게 부탁합니다.
 
-*** 2. 기존 유저
+*** 2. 기존 유저 - 신규 유저를 포함해서 패스워드 저장소를 다시 암호화
     #+BEGIN_EXAMPLE
-      $ cd ~/.password-store
+      $ cd ~/tpass
       $ git pull
-      $ update
+      $ bin/update
       $ git add .
       $ git commit -m "really add ohyecloudy@gmail.com"
       $ git push
     #+END_EXAMPLE
 
-    암호 저장소를 신규 유저 gpg key를 추가해 다시 암호화를 합니다.
+    암호 저장소를 신규 유저 gpg key를 포함해 다시 암호화를 합니다.
 
 *** 3. 신규 유저
     #+BEGIN_EXAMPLE
-      $ cd ~/.password-store
+      $ cd ~/tpass
       $ git pull
     #+END_EXAMPLE
 

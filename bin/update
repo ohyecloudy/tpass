@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -e
+
+# https://robots.thoughtbot.com/shell-script-suggestions-for-speedy-setups
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NO_COLOR='\033[0m'
+CLEAR_LINE='\r\033[K'
+
+gpg_cmd=gpg
+
+function log_info { printf "${GREEN}[INFO][Update] $1${NO_COLOR}\n"; }
+
+function set_trust () {
+    # https://blog.tersmitten.nl/how-to-ultimately-trust-a-public-key-non-interactively.html
+    local user_id=$1
+    echo "$( \
+        $gpg_cmd --list-keys --fingerprint | \
+        grep $user_id -B 1 | head -n 1 | \
+        tr -d '[:space:]' | awk 'BEGIN { FS = "=" } ; { print $2 }' \
+        ):6:" | $gpg_cmd --import-ownertrust;
+}
+
+root="$(dirname "$0")/.."
+cd $root
+
+pub_path=password_store/.team_pubs
+
+log_info "import team public keys"
+gpg-agent --daemon || true
+for f in "$pub_path"/*
+do
+    if [[ ! "$($gpg_cmd --list-key | grep -i '<${f##*/}>')" ]]
+    then
+        log_info "import & trust '${f##*/}'"
+        $gpg_cmd --import $f
+        set_trust "${f##*/}"
+    else
+        log_info "skip '${f##*/}'"
+    fi
+done
+
+tempfile=$(mktemp)
+for f in "$pub_path"/*
+do
+    >>$tempfile echo "${f##*/}"
+done
+
+log_info "cat - $tempfile"
+cat $tempfile
+
+pass init $(cat $tempfile)
+
+log_info "OK"
