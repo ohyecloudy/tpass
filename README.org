@@ -42,3 +42,20 @@
     #+END_EXAMPLE
 
     이제 사용할 수 있습니다.
+
+** 사용자 삭제
+   [[../blob/master/test/test_remove_user][test_remove_user 테스트 스크립트 참고]]
+*** 1. 유저 삭제 스크립트 실행
+    #+BEGIN_EXAMPLE
+      $ cd ~/tpass
+      $ git pull
+      $ bin/remove_user ohyecloudy@gmail.com
+    #+END_EXAMPLE
+*** 2. 삭제한 유저를 제외하고 패스워드 저장소를 다시 암호화
+    #+BEGIN_EXAMPLE
+      $ cd ~/tpass
+      $ bin/update
+      $ git add .
+      $ git commit -m "remove ohyecloudy@gmail.com"
+      $ git push
+    #+END_EXAMPLE
