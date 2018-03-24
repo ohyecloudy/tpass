@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -e
+
+# https://robots.thoughtbot.com/shell-script-suggestions-for-speedy-setups
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+function log_info { printf "${GREEN}[INFO][Remove] $1${NO_COLOR}\n"; }
+function log_error { printf "${RED}[ERRO][Remove] $1${NO_COLOR}\n"; }
+
+user=$1
+pub_path=password_store/.team_pubs/$user
+
+root="$(dirname "$0")/.."
+cd $root
+
+if [ -f $pub_path ]; then
+    log_info "delete $pub_path"
+    rm $pub_path
+else
+    log_error "$pub_path not found"
+fi
+
+log_info "OK"
