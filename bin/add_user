@@ -2,6 +2,12 @@
 
 set -e
 
+# https://robots.thoughtbot.com/shell-script-suggestions-for-speedy-setups
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+function log_info { printf "${GREEN}[INFO][Add] $1${NO_COLOR}\n"; }
+
 gpg_cmd=gpg
 
 user=$1
@@ -10,7 +16,8 @@ pub_path=password_store/.team_pubs/$user
 root="$(dirname "$0")/.."
 cd $root
 
-echo "add user - $user"
-echo "    $(realpath $pub_path)"
+log_info "add user - $user ($(realpath $pub_path))"
 
 $gpg_cmd --armor --export $user >$pub_path
+
+log_info "OK"
