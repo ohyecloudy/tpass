@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+set -e
+
+source test_util
+
+skynet_password=1234321
+
+root="$(dirname "$0")/.."
+cd $root
+
+docker kill user_a 2>/dev/null || true
+docker kill user_b 2>/dev/null || true
+
+docker build -t user_a_img test/user_a@mail.com
+docker build -t user_b_img test/user_b@mail.com
+docker run -di --rm --name user_a user_a_img bash
+docker run -di --rm --name user_b user_b_img bash
+
+tfile=/tmp/tpass.zip
+git archive -o $tfile HEAD
+
+docker cp $tfile user_a:/tmp/tpass.zip
+docker exec -i user_a unzip /tmp/tpass.zip -d /root/tpass
+docker exec -i user_a ln -s /root/tpass/password_store /root/.password-store
+
+log_info "{A} add user - user_a@mail.com"
+docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com
+
+log_info "copy tpass in user_a to user_b"
+copy_tpass user_a user_b
+
+docker exec -i user_b ln -s /root/tpass/password_store /root/.password-store
+
+log_info "{B} add user - user_b@mail.com"
+docker exec -i user_b /root/tpass/bin/add_user user_b@mail.com
+
+log_info "{B} update"
+docker exec -i user_b /root/tpass/bin/update
+
+log_info "{B} add password - skynet"
+docker exec -i user_b bash -c "cd /root/tpass &&\
+    printf '$skynet_password\n$skynet_password\n' | pass insert skynet"
+docker exec -i user_b bash -c "pass ls"
+
+log_info "{B} view password - skynet"
+actual=`docker exec -i user_b bash -c "(gpg-agent --daemon || true) && pass skynet"`
+assert $skynet_password $actual
+
+log_info "copy tpass in user_b to user_a"
+copy_tpass user_b user_a
+
+actual=`docker exec -i user_a bash -c "(gpg-agent --daemon || true) && pass skynet"`
+assert $skynet_password $actual
+
+log_info "{A} remove user - user_b@mail.com"
+docker exec -i user_a /root/tpass/bin/remove_user user_b@mail.com
+
+log_info "{A} update"
+docker exec -i user_a /root/tpass/bin/update
+
+log_info "copy tpass in user_a to user_b"
+copy_tpass user_a user_b
+
+log_info "update at user_a"
+docker exec -i user_a /root/tpass/bin/update
+
+log_info "{B} view password - skynet"
+actual=`docker exec -i user_b bash -c "((gpg-agent --daemon || true) && pass skynet) || echo 'cannot_decryption'"`
+assert "cannot_decryption" $actual
+
+log_info "$0 - OK"
