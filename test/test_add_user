@@ -2,45 +2,9 @@
 
 set -e
 
-# https://robots.thoughtbot.com/shell-script-suggestions-for-speedy-setups
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-NO_COLOR='\033[0m'
-CLEAR_LINE='\r\033[K'
+source test_util
 
 skynet_password=1234321
-
-function copy_tpass {
-    from=$1
-    to=$2
-
-    docker exec -i $from bash -c \
-           "cd /root && tar -cvf tpass_snapshot.tar tpass"
-    rm /tmp/tpass_snapshot.tar 2>/dev/null || true
-    docker cp $from:/root/tpass_snapshot.tar /tmp/tpass_snapshot.tar
-    docker cp /tmp/tpass_snapshot.tar $to:/root/tpass_snapshot.tar
-    docker exec -i $to bash -c \
-           "cd /root && tar -xvf /root/tpass_snapshot.tar"
-}
-
-function log_info { printf "${GREEN}[INFO] $1${NO_COLOR}\n"; }
-function log_success { printf "${BLUE}[TEST/SUCCESS] $1${NO_COLOR}\n"; }
-function log_failure { printf "${RED}[TEST/FAILURE] $1${NO_COLOR}\n"; }
-
-function assert {
-    expected=$1
-    actual=$2
-
-    if [ "$expected" == "$actual" ]; then
-        log_success "assert $expected == $actual"
-        return 0
-    else
-        log_failure "assert $expected == $actual"
-        exit 1
-    fi
-}
 
 root="$(dirname "$0")/.."
 cd $root
