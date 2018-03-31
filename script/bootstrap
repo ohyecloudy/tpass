@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+CLEAR_LINE='\r\033[K'
+
+function log_info { printf "${GREEN}[INFO][BOOTSTRAP] $1${NO_COLOR}\n"; }
+function log_error { printf "${RED}[ERRO][BOOTSTRAP] $1${NO_COLOR}\n"; }
+# https://stackoverflow.com/a/21188136/1848900
+function build_abs_path {
+    relative=$1
+    echo "$(cd "$(dirname "$relative")" && pwd)/$(basename "$relative")"
+}
+
+root="$(dirname "$0")/.."
+cd $root
+
+store_abs_path=$(build_abs_path password_store)
+
+log_info "check a symbolic link"
+
+if [ -L $HOME/.password-store ]; then
+    old=$(readlink -n $HOME/.password-store)
+    if [ "$old" != "$store_abs_path" ]; then
+        log_error "$HOME/.password-store -> $old"
+        log_error "- cannot create a symbolic link to $store_abs_path"
+        log_error "- rm $HOME/.password-store && script/bootstrap"
+        exit 1
+    fi
+
+    log_info "skip - already exists"
+else
+    if [ -f $HOME/.password-store ]; then
+        log_error "$HOME/.password-store file exists"
+        log_error "- cannot create a symbolic link"
+        log_error "- mv $HOME/.password-store $HOME/.password-store.backup && script/bootstrap"
+
+        exit 1
+    fi
+
+    if [ -d $HOME/.password-store ]; then
+        log_error "$HOME/.password-store directory exists"
+        log_error "- cannot create a symbolic link"
+        log_error "- mv $HOME/.password-store $HOME/.password-store.backup && script/bootstrap"
+
+        exit 1
+    fi
+
+    log_info "create a symbolic link"
+    ln -s $store_abs_path $HOME/.password-store
+fi
+
+log_info "OK"

@@ -22,7 +22,9 @@ git archive -o $tfile HEAD
 
 docker cp $tfile user_a:/tmp/tpass.zip
 docker exec -i user_a unzip /tmp/tpass.zip -d /root/tpass
-docker exec -i user_a ln -s /root/tpass/password_store /root/.password-store
+
+log_info "{A} bootstrap"
+docker exec -i user_a bash -c "cd /root/tpass && script/bootstrap"
 
 log_info "{A} add user - user_a@mail.com"
 docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com
@@ -30,7 +32,8 @@ docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com
 log_info "copy tpass in user_a to user_b"
 copy_tpass user_a user_b
 
-docker exec -i user_b ln -s /root/tpass/password_store /root/.password-store
+log_info "{B} bootstrap"
+docker exec -i user_b bash -c "cd /root/tpass && script/bootstrap"
 
 log_info "{B} add user - user_b@mail.com"
 docker exec -i user_b /root/tpass/bin/add_user user_b@mail.com

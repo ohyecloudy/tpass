@@ -3,6 +3,14 @@
 #+TITLE: tpass (Team Pass)
 #+AUTHOR: Jongbin Oh
 #+EMAIL: ohyecloudy@gmail.com
+* 시작하기
+  #+BEGIN_EXAMPLE
+    $ git clone https://github.com/ohyecloudy/tpass.git ~/tpass
+    $ cd ~/tpass
+    $ script/bootstrap
+  #+END_EXAMPLE
+
+  tpass 사용에 필요한 세팅을 하는 =bootstrap= 스크립트를 실행합니다.
 * 사용 방법
 ** 사용자 추가
    [[../blob/master/test/test_add_user][test_add_user 테스트 스크립트 참고]]
