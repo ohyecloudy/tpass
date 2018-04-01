@@ -6,6 +6,12 @@ source test_util
 
 skynet_password=1234321
 
+function get_skynet_password {
+    docker_container=$1
+    password=`docker exec -i $docker_container bash -c "((gpg-agent --daemon || true) && pass skynet) || echo 'cannot_decryption'"`
+    echo $password
+}
+
 root="$(dirname "$0")/.."
 cd $root
 
@@ -47,14 +53,13 @@ docker exec -i user_b bash -c "cd /root/tpass &&\
 docker exec -i user_b bash -c "pass ls"
 
 log_info "{B} view password - skynet"
-actual=`docker exec -i user_b bash -c "(gpg-agent --daemon || true) && pass skynet"`
-assert $skynet_password $actual
+assert $skynet_password $(get_skynet_password user_b)
 
 log_info "copy tpass in user_b to user_a"
 copy_tpass user_b user_a
 
-actual=`docker exec -i user_a bash -c "(gpg-agent --daemon || true) && pass skynet"`
-assert $skynet_password $actual
+log_info "{A} view password - skynet"
+assert $skynet_password $(get_skynet_password user_a)
 
 log_info "{A} remove user - user_b@mail.com"
 docker exec -i user_a /root/tpass/bin/remove_user user_b@mail.com
@@ -69,7 +74,6 @@ log_info "update at user_a"
 docker exec -i user_a /root/tpass/bin/update
 
 log_info "{B} view password - skynet"
-actual=`docker exec -i user_b bash -c "((gpg-agent --daemon || true) && pass skynet) || echo 'cannot_decryption'"`
-assert "cannot_decryption" $actual
+assert "cannot_decryption" $(get_skynet_password user_b)
 
 log_info "$0 - OK"
