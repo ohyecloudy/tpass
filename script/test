@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+CLEAR_LINE='\r\033[K'
+
+function log_info { printf "${GREEN}[INFO][TEST] $1${NO_COLOR}\n"; }
+function log_error { printf "${RED}[ERRO][TEST] $1${NO_COLOR}\n"; }
+
+root="$(dirname "$0")/.."
+cd $root
+
+script/bootstrap
+
+if ! command -v docker > /dev/null; then
+    log_error "You must install doker on your system before test can continue"
+    exit 1
+fi
+
+log_info "==> Running tests..."
+
+test_files=`find test -type f -name 'test_*'`
+for f in $test_files; do
+    log_info "test - $f"
+
+    if ! $f; then
+        exit 1
+    fi
+done
