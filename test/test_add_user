@@ -2,7 +2,10 @@
 
 set -e
 
-source test_util
+root="$(dirname "$0")/.."
+cd $root
+
+source test/util
 
 skynet_password=1234321
 
@@ -11,9 +14,6 @@ function get_skynet_password {
     password=`docker exec -i $docker_container bash -c "((gpg-agent --daemon || true) && pass skynet) || echo 'cannot_decryption'"`
     echo $password
 }
-
-root="$(dirname "$0")/.."
-cd $root
 
 docker kill user_a 2>/dev/null || true
 docker kill user_b 2>/dev/null || true
