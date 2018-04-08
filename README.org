@@ -1,69 +1,194 @@
 # -*- mode: org -*-
 # -*- coding: utf-8 -*-
-#+TITLE: tpass (Team Pass)
+#+TITLE: tpass (team pass)
 #+AUTHOR: Jongbin Oh
 #+EMAIL: ohyecloudy@gmail.com
-* 시작하기
-  #+BEGIN_EXAMPLE
-    $ git clone https://github.com/ohyecloudy/tpass.git ~/tpass
-    $ cd ~/tpass
-    $ script/bootstrap
-  #+END_EXAMPLE
+** tpass를 왜 만들었나?
+   팀 패스워드 관리를 [[https://www.passwordstore.org/][pass]] 프로그램으로 할 때, 팀 동료 공개키 관리를 도와준다.
 
-  tpass 사용에 필요한 세팅을 하는 =bootstrap= 스크립트를 실행합니다.
-* 사용 방법
-** 사용자 추가
-   [[../blob/master/test/test_add_user][test_add_user 테스트 스크립트 참고]]
-*** 1. 신규 유저 - public key를 저장소에 추가
+   #+BEGIN_EXAMPLE
+     $ pass init team_1@company.com team_2@company.com
+   #+END_EXAMPLE
+
+   팀원이 추가될 때마다 =pass init= 인자로 기존 멤버에 새로운 멤버를 추가해 다시 암호화(reencrypt)를 해서 공유해야 한다.
+
+   프로젝트 =tpass= 아이디어는 간단하다.
+
+   팀 동료 공개키를 특정 디렉터리(=.team_pubs=)에 모아놓고 팀원 추가([[bin/add_user]]), 팀원 제거([[bin/remove_user]]) 스크립트로 공개키를 추가 또는 삭제한다.
+
+   [[bin/update]] 스크립트로 =.team_pubs= 디렉터리에 있는 공개키로 암호화를 한다.
+
+   버전 컨트롤(git으로만 테스트)로 팀 패스워드 공유를 생각하고 스크립트를 짰다.
+
+** 시작하기
+   #+BEGIN_EXAMPLE
+     $ git clone https://github.com/ohyecloudy/tpass.git ~/tpass
+     $ cd ~/tpass
+     $ script/bootstrap
+   #+END_EXAMPLE
+
+   tpass 사용에 필요한 세팅을 하는 [[script/bootstrap]] 스크립트 실행.
+
+** tpass 스크립트 사용 방법
+   tpass는 유저 추가 또는 삭제만 한다. 패스워드 추가, 수정, 삭제는 pass 프로그램을 직접 사용한다.
+*** 내가 첫 유저
     #+BEGIN_EXAMPLE
       $ gpg --gen-key
     #+END_EXAMPLE
 
-    gpg key가 없다면 먼저 생성합니다.
+    gpg key가 없다면 먼저 생성.
 
     #+BEGIN_EXAMPLE
       $ cd ~/tpass
       $ bin/add_user ohyecloudy@gmail.com
+      $ bin/update
       $ git add .
       $ git commit -m "add ohyecloudy@gmail.com"
       $ git push
     #+END_EXAMPLE
 
-    gpg public key를 저장소에 추가합니다. 추가한 key로 다시 암호화를 해야지 접근할 수 있습니다. 다시 암호화를 하는 건 기존 유저만 가능합니다. 기존 유저에게 부탁합니다.
+    혼자 북치고 장구치면 된다. [[bin/add_user]] 스크립트로 자신을 추가하고 [[bin/update]] 스크립트를 실행해 암호 저장소를 만들면 된다.
 
-*** 2. 기존 유저 - 신규 유저를 포함해서 패스워드 저장소를 다시 암호화
+*** 유저 추가
+    [[test/test_add_user]] 테스트 스크립트 참고.
+**** 1. 신규 유저 - public key를 저장소에 추가
+     #+BEGIN_EXAMPLE
+       $ gpg --gen-key
+     #+END_EXAMPLE
+
+     gpg key가 없다면 먼저 생성.
+
+     #+BEGIN_EXAMPLE
+       $ cd ~/tpass
+       $ bin/add_user ohyecloudy@gmail.com
+       $ git add .
+       $ git commit -m "add ohyecloudy@gmail.com"
+       $ git push
+     #+END_EXAMPLE
+
+     public key를 [[bin/add_user]] 스크립트를 사용해 추가. 아직 암호 저장소에는 접근할 수 없다. 기존 유저에게 부탁해야 한다.
+
+**** 2. 기존 유저 - 신규 유저를 포함해서 패스워드 저장소를 다시 암호화
+     #+BEGIN_EXAMPLE
+       $ cd ~/tpass
+       $ git pull
+       $ bin/update
+       $ git add .
+       $ git commit -m "really add ohyecloudy@gmail.com"
+       $ git push
+     #+END_EXAMPLE
+
+     암호 저장소를 [[bin/update]] 스크립트를 실행해 신규 유저 gpg key를 포함해 다시 암호화.
+
+**** 3. 신규 유저
+     #+BEGIN_EXAMPLE
+       $ cd ~/tpass
+       $ git pull
+     #+END_EXAMPLE
+
+     이제 사용할 수 있다.
+
+*** 유저 삭제
+    [[test/test_remove_user]] 테스트 스크립트 참고
+
+**** 1. 유저 삭제 스크립트 실행
+     #+BEGIN_EXAMPLE
+       $ cd ~/tpass
+       $ git pull
+       $ bin/remove_user ohyecloudy@gmail.com
+     #+END_EXAMPLE
+
+     [[bin/remove_user]] 스크립트를 사용해 public key를 모아둔 디렉터리에서 삭제. 아직 저장소를 다시 암호화한 게 아니기 때문에 접근 가능.
+
+**** 2. 삭제한 유저를 제외하고 패스워드 저장소를 다시 암호화
+     #+BEGIN_EXAMPLE
+       $ cd ~/tpass
+       $ bin/update
+       $ git add .
+       $ git commit -m "remove ohyecloudy@gmail.com"
+       $ git push
+     #+END_EXAMPLE
+
+     [[bin/update]] 스크립트를 사용해 삭제한 유저를 제외하고 다시 암호화.
+
+** pass 사용 방법
+*** 패스워드 추가
     #+BEGIN_EXAMPLE
-      $ cd ~/tpass
-      $ git pull
-      $ bin/update
-      $ git add .
-      $ git commit -m "really add ohyecloudy@gmail.com"
-      $ git push
+      $ pass insert aws/account/team@company.com
+      Enter password for aws/account/team@company.com:
+      Retype password for aws/account/team@company.com:
+
+      $ pass ls
+      Password Store
+      └── aws
+          └── account
+              └── team@company.com
     #+END_EXAMPLE
 
-    암호 저장소를 신규 유저 gpg key를 포함해 다시 암호화를 합니다.
-
-*** 3. 신규 유저
+*** 패스워드 추가, 파일 생성 - PEM
     #+BEGIN_EXAMPLE
-      $ cd ~/tpass
-      $ git pull
+      $ pass insert -m aws/pem/dev-server < dev-server.pem
+
+      Enter contents of aws/pem/dev-server and press Ctrl+D when finished:
+
+      $ pass ls
+      Password Store
+      └── aws
+          └── pem
+              └── dev-server
     #+END_EXAMPLE
 
-    이제 사용할 수 있습니다.
+    =-m= 옵션을 사용하면 여러 줄도 문제없다.
 
-** 사용자 삭제
-   [[../blob/master/test/test_remove_user][test_remove_user 테스트 스크립트 참고]]
-*** 1. 유저 삭제 스크립트 실행
     #+BEGIN_EXAMPLE
-      $ cd ~/tpass
-      $ git pull
-      $ bin/remove_user ohyecloudy@gmail.com
+      $ pass aws/pem/dev-server > dev-server.pem
+
+      $ ssh -i dev-server.pem user@dev-server
     #+END_EXAMPLE
-*** 2. 삭제한 유저를 제외하고 패스워드 저장소를 다시 암호화
+
+    파일로 생성해 사용하면 된다.
+
+*** 패스워드 조회
     #+BEGIN_EXAMPLE
-      $ cd ~/tpass
-      $ bin/update
-      $ git add .
-      $ git commit -m "remove ohyecloudy@gmail.com"
-      $ git push
+      $ pass aws/account/team@company.com
+      1234
     #+END_EXAMPLE
+
+*** 패스워드 자동 생성
+    #+BEGIN_EXAMPLE
+      $ pass generate aws/account/user@company.com
+      The generated password for aws/account/user@company.com is:
+      }6ch/7DW>ljK5mRdzL3s{AtN2
+
+      $ pass aws/account/user@company.com
+      }6ch/7DW>ljK5mRdzL3s{AtN2
+    #+END_EXAMPLE
+
+    =-n= 옵션을 추가하면 특수문자(symbol)는 빼고 임의 패스워드를 만든다.
+
+*** 패스워드 삭제
+    #+BEGIN_EXAMPLE
+      $ pass ls
+      Password Store
+      └── aws
+          └── account
+              ├── team@company.com
+              └── user@company.com
+
+      $ pass rm aws/account/user@company.com
+      Are you sure you would like to delete aws/account/user@company.com? [y/N] y
+      /Users/ohyecloudy/.password-store/aws/account/user@company.com.gpg
+
+      $ pass ls
+      Password Store
+      └── aws
+          └── account
+              └── team@company.com
+    #+END_EXAMPLE
+
+*** 사용법 참고
+    - [[http://www.boxnwhis.kr/2017/04/27/how_to_manage_passwords_for_your_team.html][팀 공용 계정 비밀번호 관리하기 - boxnwhis.kr]]
+    - [[https://www.passwordstore.org/]]
+
+** 왜 굳이 pass 프로그램을 사용하려고 하는가?
+   [[https://github.com/git-for-windows/build-extra][git for windows SDK]]와 같이 배포되는 =pass= 프로그램을 추가 설치 없이 사용하려고 만들었다. 그래서 팀 패스워드 관리 목적으로 만든 [[https://github.com/justwatchcom/gopass][justwatchcom/gopass]]는 고려 대상에서 제외했다.
