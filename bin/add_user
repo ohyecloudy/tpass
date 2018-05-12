@@ -16,7 +16,7 @@ pub_path=password_store/.team_pubs/$user
 root="$(dirname "$0")/.."
 cd $root
 
-log_info "add user - $user ($(realpath $pub_path))"
+log_info "add user - $user ($pub_path)"
 
 $gpg_cmd --armor --export $user >$pub_path
 
