@@ -29,7 +29,6 @@ cd $root
 pub_path=password_store/.team_pubs
 
 log_info "import team public keys"
-gpg-agent --daemon || true
 for f in "$pub_path"/*
 do
     if [[ ! "$($gpg_cmd --list-key | grep -i '<${f##*/}>')" ]]

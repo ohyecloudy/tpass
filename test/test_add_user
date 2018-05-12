@@ -11,7 +11,7 @@ skynet_password=1234321
 
 function get_skynet_password {
     docker_container=$1
-    password=`docker exec -i $docker_container bash -c "((gpg-agent --daemon || true) && pass skynet) || echo 'cannot_decryption'"`
+    password=`docker exec -i $docker_container bash -c "pass skynet || echo 'cannot_decryption'"`
     echo $password
 }
 
@@ -22,6 +22,10 @@ docker build -t user_a_img test/user_a@mail.com
 docker build -t user_b_img test/user_b@mail.com
 docker run -di --rm --name user_a user_a_img bash
 docker run -di --rm --name user_b user_b_img bash
+log_info "{A} gpg-agent --daemon"
+docker exec -i user_a gpg-agent --daemon
+log_info "{B} gpg-agent --daemon"
+docker exec -i user_b gpg-agent --daemon
 
 tfile=/tmp/tpass.zip
 git archive -o $tfile HEAD
