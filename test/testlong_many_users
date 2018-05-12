@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+set -e
+
+root="$(dirname "$0")/.."
+cd $root
+
+source test/util
+
+user_count=100
+skynet_password=1234321
+
+function get_skynet_password {
+    docker_container=$1
+    password=`docker exec -i $docker_container bash -c "pass skynet || echo 'cannot_decryption'"`
+    echo $password
+}
+
+docker kill user_a 2>/dev/null || true
+docker kill user_b 2>/dev/null || true
+
+docker build -t user_a_img test/user_a@mail.com
+docker run -di --rm --name user_a user_a_img bash
+log_info "{A} gpg-agent --daemon"
+docker exec -i user_a gpg-agent --daemon
+
+tfile=/tmp/tpass.zip
+git archive -o $tfile HEAD
+
+docker cp $tfile user_a:/tmp/tpass.zip
+docker exec -i user_a unzip /tmp/tpass.zip -d /root/tpass
+
+log_info "{A} bootstrap"
+docker exec -i user_a bash -c "cd /root/tpass && script/bootstrap"
+
+log_info "{A} add user - user_a@mail.com"
+docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com
+
+log_info "{A} update at user_a"
+docker exec -i user_a /root/tpass/bin/update
+
+log_info "{A} add password - skynet"
+docker exec -i user_a bash -c "cd /root/tpass &&\
+    printf '$skynet_password\n$skynet_password\n' | pass insert skynet"
+docker exec -i user_a bash -c "pass ls"
+
+log_info "{A} view password - skynet"
+assert $skynet_password $(get_skynet_password user_a)
+
+log_info "{A} add user - 100 users"
+for (( i=0; i<${user_count}; i++ ))
+do
+    key_script=/tmp/gen-key-script
+
+     >$key_script echo "Key-Type: 1"
+    >>$key_script echo "Key-Length: 2048"
+    >>$key_script echo "Subkey-Type: 1"
+    >>$key_script echo "Subkey-Length: 2048"
+    >>$key_script echo "Name-Real: user $i"
+    >>$key_script echo "Name-Email: user_$i@mail.com"
+    >>$key_script echo "Expire-Date: 0"
+
+    docker cp $key_script user_a:$key_script
+
+    docker exec -i user_a bash -c "gpg --gen-key --batch $key_script"
+    docker exec -i user_a /root/tpass/bin/add_user user_$i@mail.com
+done
+
+log_info "{A} update at user_a"
+docker exec -i user_a /root/tpass/bin/update
+
+log_info "{A} view password - skynet"
+assert $skynet_password $(get_skynet_password user_a)
+
+log_info "$0 - OK"
