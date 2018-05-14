@@ -11,7 +11,9 @@ function log_info { printf "${GREEN}[INFO][Remove] $1${NO_COLOR}\n"; }
 function log_error { printf "${RED}[ERRO][Remove] $1${NO_COLOR}\n"; }
 
 user=$1
-pub_path=password_store/.team_pubs/$user
+pass_directory=${2:-.}
+
+pub_path=password_store/$pass_directory/.team_pubs/$user
 
 root="$(dirname "$0")/.."
 cd $root

@@ -33,6 +33,12 @@ docker exec -i user_a bash -c "cd /root/tpass && script/bootstrap"
 log_info "{A} add user - user_a@mail.com"
 docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com
 
+log_info "{A} add user to redzone - user_a@mail.com"
+docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com redzone
+
+log_info "{A} add user to bluezone/puplezone - user_a@mail.com"
+docker exec -i user_a /root/tpass/bin/add_user user_a@mail.com bluezone/puplezone
+
 log_info "copy tpass in user_a to user_b"
 copy_tpass user_a user_b
 
@@ -42,16 +48,33 @@ docker exec -i user_b bash -c "cd /root/tpass && script/bootstrap"
 log_info "{B} add user - user_b@mail.com"
 docker exec -i user_b /root/tpass/bin/add_user user_b@mail.com
 
+log_info "{B} add user to redzone - user_b@mail.com"
+docker exec -i user_b /root/tpass/bin/add_user user_b@mail.com redzone
+
+log_info "{B} add user to bluezone/puplezone - user_b@mail.com"
+docker exec -i user_b /root/tpass/bin/add_user user_b@mail.com bluezone/puplezone
+
 log_info "{B} update"
 docker exec -i user_b /root/tpass/bin/update
 
 log_info "{B} add password - skynet"
-docker exec -i user_b bash -c "cd /root/tpass &&\
-    printf '$skynet_password\n$skynet_password\n' | pass insert skynet"
+docker exec -i user_b bash -c "printf '$skynet_password\n$skynet_password\n' | pass insert skynet"
 docker exec -i user_b bash -c "pass ls"
+
+log_info "{B} add password - redzone/skynet"
+docker exec -i user_b bash -c "printf '$skynet_password\n$skynet_password\n' | pass insert redzone/skynet"
+
+log_info "{B} add password - bluezone/puplezone/skynet"
+docker exec -i user_b bash -c "printf '$skynet_password\n$skynet_password\n' | pass insert bluezone/puplezone/skynet"
 
 log_info "{B} view password - skynet"
 assert $skynet_password $(get_password user_b skynet)
+
+log_info "{B} view password - redzone/skynet"
+assert $skynet_password $(get_password user_b redzone/skynet)
+
+log_info "{B} view password - bluezone/puplezone/skynet"
+assert $skynet_password $(get_password user_b bluezone/puplezone/skynet)
 
 log_info "copy tpass in user_b to user_a"
 copy_tpass user_b user_a
@@ -59,8 +82,17 @@ copy_tpass user_b user_a
 log_info "{A} view password - skynet"
 assert $skynet_password $(get_password user_a skynet)
 
+log_info "{A} view password - redzone/skynet"
+assert $skynet_password $(get_password user_a redzone/skynet)
+
+log_info "{A} view password - bluezone/puplezone/skynet"
+assert $skynet_password $(get_password user_a bluezone/puplezone/skynet)
+
 log_info "{A} remove user - user_b@mail.com"
 docker exec -i user_a /root/tpass/bin/remove_user user_b@mail.com
+
+log_info "{A} remove user at bluezone/puplezone - user_b@mail.com"
+docker exec -i user_a /root/tpass/bin/remove_user user_b@mail.com bluezone/puplezone
 
 log_info "{A} update"
 docker exec -i user_a /root/tpass/bin/update
@@ -73,5 +105,11 @@ docker exec -i user_a /root/tpass/bin/update
 
 log_info "{B} view password - skynet"
 assert "cannot_decryption" $(get_password user_b skynet)
+
+log_info "{B} view password - redzone/skynet"
+assert $skynet_password $(get_password user_b redzone/skynet)
+
+log_info "{B} view password - bluezone/puplezone/skynet"
+assert "cannot_decryption" $(get_password user_b bluezone/puplezone/skynet)
 
 log_info "$0 - OK"

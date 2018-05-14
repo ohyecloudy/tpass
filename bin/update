@@ -10,6 +10,7 @@ NO_COLOR='\033[0m'
 CLEAR_LINE='\r\033[K'
 
 gpg_cmd=gpg
+default_pub_path=password_store/.team_pubs
 
 function log_info { printf "${GREEN}[INFO][Update] $1${NO_COLOR}\n"; }
 
@@ -48,15 +49,22 @@ function trust_then_password_store_rehash () {
     log_info "cat - $tempfile"
     cat $tempfile
 
-    log_info "pass init"
-    pass init $(cat $tempfile)
+    if [[ "$pub_path" == "$default_pub_path" ]]; then
+        log_info "pass init"
+        pass init $(cat $tempfile)
+    else
+        sub_path=$(dirname $pub_path | cut -d/ -f 2-)
+        log_info "pass init -p $sub_path"
+        pass init -p $sub_path $(cat $tempfile)
+    fi
 }
 
 root="$(dirname "$0")/.."
 cd $root
 
-pub_path=password_store/.team_pubs
-
-trust_then_password_store_rehash $pub_path
+for p in $(find password_store -name .team_pubs -type d)
+do
+    trust_then_password_store_rehash $p
+done
 
 log_info "OK"

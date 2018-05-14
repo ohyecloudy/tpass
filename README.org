@@ -111,6 +111,30 @@
 
      [[bin/update]] 스크립트를 사용해 삭제한 유저를 제외하고 다시 암호화.
 
+*** 디렉터리별 접근 권한을 정의
+    [[bin/add_user]], [[bin/remove_user]] 두번째 인자로 서브 디렉터리 경로를 넣으면 된다. 유저 추가, 삭제와 마찬가지로 유저 변화가 있다면 [[bin/update]]를 실행해야 한다.
+
+    #+BEGIN_EXAMPLE
+      $ cd ~/tpass
+      $ bin/add_user ohyecloudy@mail.com redzone
+      $ bin/update
+    #+END_EXAMPLE
+
+    redzone 디렉터리 접근 권한을 할당했다. root 디렉터리 접근 권한이 있더라도 redzone 디렉터리 접근 권한을 받지 않으면 저장한 패스워드를 볼 수 없다.
+
+    #+BEGIN_EXAMPLE
+      $ pass insert redzone/aws/account/team@company.com
+    #+END_EXAMPLE
+
+    pass 프로그램을 사용해 패스워드 추가, 조회, 삭제 방법은 동일. 권한 관리는 디렉터리 기준인 것만 기억하면 된다.
+
+    #+BEGIN_EXAMPLE
+      $ cd ~/tpass
+      $ bin/remove_user ohyecloudy@mail.com redzone
+      $ bin/update
+    #+END_EXAMPLE
+
+    두번째 인자로 서브 디렉터리 경로를 넣으면 해당 디렉터리 접근 권한을 제거한다.
 ** pass 사용 방법
 *** 패스워드 추가
     #+BEGIN_EXAMPLE

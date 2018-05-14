@@ -11,10 +11,14 @@ function log_info { printf "${GREEN}[INFO][Add] $1${NO_COLOR}\n"; }
 gpg_cmd=gpg
 
 user=$1
-pub_path=password_store/.team_pubs/$user
+pass_directory=${2:-.}
 
 root="$(dirname "$0")/.."
 cd $root
+
+pub_dir=password_store/$pass_directory/.team_pubs
+mkdir -p $pub_dir
+pub_path=$pub_dir/$user
 
 log_info "add user - $user ($pub_path)"
 
