@@ -9,12 +9,6 @@ source test/util
 
 skynet_password=1234321
 
-function get_skynet_password {
-    docker_container=$1
-    password=`docker exec -i $docker_container bash -c "pass skynet || echo 'cannot_decryption'"`
-    echo $password
-}
-
 docker kill user_a 2>/dev/null || true
 docker kill user_b 2>/dev/null || true
 
@@ -57,13 +51,13 @@ docker exec -i user_b bash -c "cd /root/tpass &&\
 docker exec -i user_b bash -c "pass ls"
 
 log_info "{B} view password - skynet"
-assert $skynet_password $(get_skynet_password user_b)
+assert $skynet_password $(get_password user_b skynet)
 
 log_info "copy tpass in user_b to user_a"
 copy_tpass user_b user_a
 
 log_info "{A} view password - skynet"
-assert $skynet_password $(get_skynet_password user_a)
+assert $skynet_password $(get_password user_a skynet)
 
 log_info "{A} remove user - user_b@mail.com"
 docker exec -i user_a /root/tpass/bin/remove_user user_b@mail.com
@@ -78,6 +72,6 @@ log_info "update at user_a"
 docker exec -i user_a /root/tpass/bin/update
 
 log_info "{B} view password - skynet"
-assert "cannot_decryption" $(get_skynet_password user_b)
+assert "cannot_decryption" $(get_password user_b skynet)
 
 log_info "$0 - OK"

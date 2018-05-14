@@ -39,3 +39,10 @@ function assert {
         exit 1
     fi
 }
+
+function get_password {
+    docker_container=$1
+    password_path=$2
+    password=`docker exec -i $docker_container bash -c "pass $password_path || echo 'cannot_decryption'"`
+    echo $password
+}

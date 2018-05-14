@@ -23,33 +23,40 @@ function set_trust () {
         ):6:" | $gpg_cmd --import-ownertrust;
 }
 
+function trust_then_password_store_rehash () {
+    local pub_path=$1
+
+    log_info "import team public keys"
+    for f in "$pub_path"/*
+    do
+        if [[ ! "$($gpg_cmd --list-key | grep -i '<${f##*/}>')" ]]
+        then
+            log_info "import & trust '${f##*/}'"
+            $gpg_cmd --import $f
+            set_trust "${f##*/}"
+        else
+            log_info "skip '${f##*/}'"
+        fi
+    done
+
+    tempfile=$(mktemp)
+    for f in "$pub_path"/*
+    do
+        >>$tempfile echo "${f##*/}"
+    done
+
+    log_info "cat - $tempfile"
+    cat $tempfile
+
+    log_info "pass init"
+    pass init $(cat $tempfile)
+}
+
 root="$(dirname "$0")/.."
 cd $root
 
 pub_path=password_store/.team_pubs
 
-log_info "import team public keys"
-for f in "$pub_path"/*
-do
-    if [[ ! "$($gpg_cmd --list-key | grep -i '<${f##*/}>')" ]]
-    then
-        log_info "import & trust '${f##*/}'"
-        $gpg_cmd --import $f
-        set_trust "${f##*/}"
-    else
-        log_info "skip '${f##*/}'"
-    fi
-done
-
-tempfile=$(mktemp)
-for f in "$pub_path"/*
-do
-    >>$tempfile echo "${f##*/}"
-done
-
-log_info "cat - $tempfile"
-cat $tempfile
-
-pass init $(cat $tempfile)
+trust_then_password_store_rehash $pub_path
 
 log_info "OK"
