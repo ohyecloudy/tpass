@@ -220,5 +220,12 @@
 ** 사용 가능 인원
    [[test/testlong_many_users]] 테스트로 100명까지 사용 가능 확인
 
+   #+BEGIN_EXAMPLE
+     $ cd ~/tpass
+     $ test/testlong_many_users 500
+   #+END_EXAMPLE
+
+   인자로 유저 수를 바꿔서 테스트할 수 있다.
+
 ** 왜 굳이 pass 프로그램을 사용하려고 하는가?
    [[https://github.com/git-for-windows/build-extra][git for windows SDK]]와 같이 배포되는 =pass= 프로그램을 추가 설치 없이 사용하려고 만들었다. 그래서 팀 패스워드 관리 목적으로 만든 [[https://github.com/justwatchcom/gopass][justwatchcom/gopass]]는 고려 대상에서 제외했다.

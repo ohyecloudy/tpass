@@ -7,7 +7,7 @@ cd $root
 
 source test/util
 
-user_count=100
+user_count=${1:-100}
 skynet_password=1234321
 
 function get_skynet_password {
@@ -47,7 +47,7 @@ docker exec -i user_a bash -c "pass ls"
 log_info "{A} view password - skynet"
 assert $skynet_password $(get_skynet_password user_a)
 
-log_info "{A} add user - 100 users"
+log_info "{A} add user - $user_count users"
 for (( i=0; i<${user_count}; i++ ))
 do
     key_script=/tmp/gen-key-script
