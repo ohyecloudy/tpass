@@ -44,9 +44,11 @@
     #+BEGIN_EXAMPLE
       $ cd ~/tpass
       $ bin/add_user ohyecloudy@gmail.com
-      $ bin/update
       $ git add .
       $ git commit -m "add ohyecloudy@gmail.com"
+      $ bin/update
+      $ git log -n 1
+      recrypted 커밋이 자동으로 만들어졌는지 확인
       $ git push
     #+END_EXAMPLE
 
@@ -76,8 +78,8 @@
        $ cd ~/tpass
        $ git pull
        $ bin/update
-       $ git add .
-       $ git commit -m "really add ohyecloudy@gmail.com"
+       $ git log -n 1
+       recrypted 커밋이 자동으로 만들어졌는지 확인
        $ git push
      #+END_EXAMPLE
 
@@ -107,8 +109,8 @@
      #+BEGIN_EXAMPLE
        $ cd ~/tpass
        $ bin/update
-       $ git add .
-       $ git commit -m "remove ohyecloudy@gmail.com"
+       $ git log -n 1
+       recrypted 커밋이 자동으로 만들어졌는지 확인
        $ git push
      #+END_EXAMPLE
 
@@ -121,6 +123,9 @@
       $ cd ~/tpass
       $ bin/add_user ohyecloudy@mail.com redzone
       $ bin/update
+      $ git log -n 1
+      recrypted 커밋이 자동으로 만들어졌는지 확인
+      $ git push
     #+END_EXAMPLE
 
     redzone 디렉터리 접근 권한을 할당했다. root 디렉터리 접근 권한이 있더라도 redzone 디렉터리 접근 권한을 받지 않으면 저장한 패스워드를 볼 수 없다.
@@ -135,6 +140,9 @@
       $ cd ~/tpass
       $ bin/remove_user ohyecloudy@mail.com redzone
       $ bin/update
+      $ git log -n 1
+      recrypted 커밋이 자동으로 만들어졌는지 확인
+      $ git push
     #+END_EXAMPLE
 
     두번째 인자로 서브 디렉터리 경로를 넣으면 해당 디렉터리 접근 권한을 제거한다.
