@@ -50,7 +50,11 @@ else
     fi
 
     log_info "create a symbolic link"
-    ln -s $store_abs_path $HOME/.password-store
+    if [[ "$MSYSTEM" == "MSYS" ]] || [[ "$MSYSTEM" == "MINGW"* ]]; then
+        cmd /c "mklink /J %homedrive%%homepath%\.password-store %cd%\password_store"
+    else
+        ln -s $store_abs_path $HOME/.password-store
+    fi
 fi
 
 log_info "OK"
