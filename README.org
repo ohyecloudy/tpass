@@ -28,10 +28,17 @@
    #+END_EXAMPLE
 
    tpass 사용에 필요한 세팅을 하는 [[script/bootstrap]] 스크립트 실행.
-*** 설치
-    - Windows는 [[https://github.com/git-for-windows/build-extra][git for windows SDK]] 설치
-    - 다른 운영체제는 [[https://www.passwordstore.org/][pass]] 메뉴얼 참고
+*** 설치 - windows
+    [[https://github.com/git-for-windows/build-extra][git for windows SDK]] 설치
 
+    #+BEGIN_EXAMPLE
+      $ pacman -Sy
+      $ pacman -S pass
+    #+END_EXAMPLE
+
+    [[https://wiki.archlinux.org/index.php/pacman][pacman]] 패키지 매니저로 pass 프로그램을 설치한다.
+*** 설치 - mac, linux
+    [[https://www.passwordstore.org/][pass]] 메뉴얼 참고
 ** tpass 스크립트 사용 방법
    tpass는 유저 추가 또는 삭제만 한다. 패스워드 추가, 수정, 삭제는 pass 프로그램을 직접 사용한다.
 *** 내가 첫 유저
