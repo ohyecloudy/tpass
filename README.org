@@ -262,3 +262,8 @@
 
 ** 왜 굳이 pass 프로그램을 사용하려고 하는가?
    [[https://github.com/git-for-windows/build-extra][git for windows SDK]]와 같이 배포되는 =pass= 프로그램을 추가 설치 없이 사용하려고 만들었다. 그래서 팀 패스워드 관리 목적으로 만든 [[https://github.com/justwatchcom/gopass][justwatchcom/gopass]]는 고려 대상에서 제외했다.
+
+** 개발 후기
+
+   [[http://ohyecloudy.com/pnotes/archives/side-project-tpass/][#side_project 팀 패스워드 관리 프로그램 tpass 후기]] 
+   
